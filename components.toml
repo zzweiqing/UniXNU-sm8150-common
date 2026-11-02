@@ -46,13 +46,14 @@ build = ["build-arm-driver.py", "ArmDTPlatform"]
 outputs = ["build/armdtplatform/libArmDTPlatform.a"]
 
 [[component]]
-id = "NativeUfs"
+id = "ShengUfs"
 kind = "driver"
 function = "SM8150 UFS queues, SMMU mappings and device storage windows"
 scope = "soc"
-# Upstream UniXNU/NativeUfs plus the nabu board patch
-# (patches/nabu-nativeufs-board.patch in UniXNU-nabu).
-repository = "https://github.com/UniXNU/NativeUfs.git"
+# Upstream renamed UniXNU/NativeUfs to UniXNU/ShengUfs (catalog id ShengUfs,
+# legacy_name NativeUfs); the pinned commit predates the rename. nabu applies
+# its board patch (patches/nabu-nativeufs-board.patch in UniXNU-nabu).
+repository = "https://github.com/UniXNU/ShengUfs.git"
 revision = "af785c1777161a62931425c2faaa536ce0bebd5b"
 path = "drivers/NativeUfs"
 hardware = ["SM8150 UFS controller", "Qualcomm SMMU"]
