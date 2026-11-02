@@ -1,0 +1,15 @@
+schema_version = 2
+
+[soc]
+name = "sm8150"
+description = "Qualcomm SM8150 (Snapdragon 855/860), Kryo 485 octa-core, Adreno 640"
+# Mainline-style board kernel used as the hardware reference for MMIO windows,
+# clock/power domains and firmware ownership. The UniXNU drivers are native
+# implementations; this pin records which hardware document was reviewed.
+source_repository = "https://github.com/SeimoDev/linux-xiaomi-nabu"
+source_revision = "4e6d08bb1b467c721e19cd693e4ec7388d982d73"
+
+[components]
+# Shared components selected by every SM8150 device. Device repositories add
+# their own board components through their components.toml.
+include = ["ArmDTPlatform", "ArmCpu", "NativeUfs", "NabuAdreno", "AdrenoMetal"]

@@ -1,0 +1,129 @@
+schema_version = 1
+
+# SM8150-scoped component declarations. Device repositories inherit this table
+# through the soc feed and may override entries in their own components.toml.
+
+[[component]]
+id = "ArmCpu"
+kind = "driver"
+function = "SM8150 GICv3, architectural timer and eight-core Kryo 485 startup"
+scope = "soc"
+# nabu compiles this revision with the SGI/timer transforms in UniXNU-nabu
+# scripts/nabu_armcpu_source.py (gitlink of UniXNU/UniXNU 245aca1a).
+repository = "https://github.com/UniXNU/ArmCpu.git"
+revision = "1951cc8444b340d7d8879e9418220cf29eb711d7"
+path = "drivers/ArmCpu"
+hardware = ["SM8150", "ARM GICv3", "ARM generic timer"]
+os_abi = ["ipados-17.7-21H16"]
+board_dependencies = ["CPU affinities and cluster properties in DTS", "UEFI PSCI services"]
+verified_devices = []
+dependencies = []
+source_files = ["ArmCpu.cpp"]
+runtime_identifiers = ["org.blu-sharky.ArmCpu", "ArmCpu"]
+build_stage = "kernel"
+build = ["build-arm-driver.py", "ArmCpu"]
+outputs = ["build/armcpu/libArmCpu.a"]
+
+[[component]]
+id = "ArmDTPlatform"
+kind = "driver"
+function = "ADT platform provider for SM8150 boards"
+scope = "soc"
+# Compiled through UniXNU-nabu scripts/build-nabu-platform.py
+# (gitlink of UniXNU/UniXNU 245aca1a).
+repository = "https://github.com/UniXNU/ArmDTPlatform.git"
+revision = "0d544705c2e89725caabc0542bb96bc8febd8c70"
+path = "drivers/ArmDTPlatform"
+hardware = ["SM8150"]
+os_abi = ["ipados-17.7-21H16"]
+board_dependencies = ["Board ADT produced by the payload generator"]
+verified_devices = []
+dependencies = []
+source_files = []
+runtime_identifiers = ["ArmDTPlatform"]
+build_stage = "kernel"
+build = ["build-arm-driver.py", "ArmDTPlatform"]
+outputs = ["build/armdtplatform/libArmDTPlatform.a"]
+
+[[component]]
+id = "NativeUfs"
+kind = "driver"
+function = "SM8150 UFS queues, SMMU mappings and device storage windows"
+scope = "soc"
+# Upstream UniXNU/NativeUfs plus the nabu board patch
+# (patches/nabu-nativeufs-board.patch in UniXNU-nabu).
+repository = "https://github.com/UniXNU/NativeUfs.git"
+revision = "af785c1777161a62931425c2faaa536ce0bebd5b"
+path = "drivers/NativeUfs"
+hardware = ["SM8150 UFS controller", "Qualcomm SMMU"]
+os_abi = ["ipados-17.7-21H16", "IOStorageFamily"]
+board_dependencies = ["nabu,ufs-hc/gcc/smmu/stream board resources", "userdata windows", "Apple storage bindings"]
+verified_devices = ["nabu"]
+dependencies = []
+source_files = ["NativeUfs.cpp"]
+runtime_identifiers = ["NativeUfs", "org.blu-sharky.NativeUfs"]
+build_stage = "embedded"
+build = []
+outputs = ["build/native-ufs/libNativeUfs.a", "build/native-ufs/bindings.json"]
+
+[[component]]
+id = "NabuAdreno"
+kind = "driver"
+function = "Adreno 640 GMU power, SMMU memory, CP submission and scanout handoff"
+scope = "soc"
+# Vendored pristine at UniXNU-nabu gpu/upstream/Adreno6xx (branch
+# unixnu-sm-t733); the A640 SM8150 overlay lives in gpu/a640 and replaces
+# same-named files at build time. See gpu/upstream/Adreno6xx/PROVENANCE.
+repository = "https://github.com/RigoLigoRLC/unixnu-adreno6xx.git"
+revision = "83a0453e981567a30cecd6486bdb8b3b33d64683"
+path = "drivers/Adreno6xx"
+hardware = ["Adreno 640", "SM8150"]
+os_abi = ["ipados-17.7-21H16", "IOGPUFamily"]
+board_dependencies = ["A640 GMU, SQE and ZAP firmware", "GPU power resources", "GPU and GMMU stream ownership"]
+verified_devices = ["nabu"]
+dependencies = ["ArmSmmu4K", "AdrenoPM4", "AdrenoFirmware"]
+source_files = ["NativeAdrenoService.cpp", "NativeAdrenoA6xxGmu.cpp", "NativeAdrenoScheduler.cpp"]
+runtime_identifiers = ["NativeAdrenoGpuPublished", "AGXDeviceUserClient"]
+build_stage = "embedded"
+build = []
+outputs = ["build/adreno6xx/libAdreno6xx.a"]
+
+[[component]]
+id = "AdrenoMetal"
+kind = "driver"
+function = "Metal frontend through metal2vulkan and Turnip on Adreno 640"
+scope = "gpu"
+# Gitlink of UniXNU cd2dd1bd; nabu applies its board patch series
+# (UniXNU-nabu patches/adrenometal-*.patch) on this revision.
+repository = "https://github.com/RigoLigoRLC/unixnu-adrenometal.git"
+revision = "baad47ca22b181bf0ef0d08412d3ed1f96945e16"
+path = "drivers/AdrenoMetal"
+hardware = ["Adreno 640", "SM8150", "Turnip Darwin backend", "kernel GPU user-client ABI"]
+os_abi = ["ipados-17.7-21H16"]
+board_dependencies = ["display integration", "shader cache"]
+verified_devices = ["nabu"]
+dependencies = ["NabuAdreno", "AdrenoPM4"]
+source_files = ["NativeAdrenoMetalPlugin.mm", "NativeAdrenoSystemFormatPolicy.h", "NativeBridgeMetalFrontend.mm", "bridge/NativeMetalBridge.rs", "bridge/NativeMetalObjects.rs", "bridge/NativeMetalObjects.h"]
+runtime_identifiers = ["NativeMetal", "NativeAdrenoMetalPlugin.mm", "NativeAdrenoMetal.bundle", "NativeAdrenoMetal", "libvulkan_freedreno.dylib"]
+build_stage = "payload"
+build = []
+outputs = ["build/adreno-metal-plugin/NativeAdrenoMetal.bundle"]
+
+[[component]]
+id = "metal2vulkan"
+kind = "driver"
+function = "Metal shader translation to SPIR-V for the Turnip backend"
+scope = "gpu"
+repository = "https://github.com/steelbrain/metal2vulkan.git"
+revision = "624bab3918de5b978e1101517abca2b4fa426565"
+path = ".cache/gpu-reference/metal2vulkan"
+hardware = ["Adreno 640", "Turnip Darwin backend"]
+os_abi = ["ipados-17.7-21H16"]
+board_dependencies = ["AdrenoMetal plugin"]
+verified_devices = []
+dependencies = []
+source_files = []
+runtime_identifiers = ["metal2vulkan"]
+build_stage = "payload"
+build = []
+outputs = []

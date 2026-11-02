@@ -1,0 +1,10 @@
+out/
+.cache/
+local.toml
+__pycache__/
+*.pyc
+*.ipsw
+*.dmg
+*.img
+*.mbn
+*.elf

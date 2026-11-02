@@ -1,0 +1,10 @@
+# SM8150 SoC XNU patch series, applied after the arch series and before the
+# os/device series. Currently empty: the SM8150-specific kernel changes live
+# in the device repository series and in component sources.
+#
+# Known SoC-level fixes carried in component sources instead of this series:
+# - ArmCpu signalCPU/selftest inline assembly must emit each instruction on its
+#   own line: LLVM for Darwin ARM64 treats ';' as a comment start, so the old
+#   single-line form only generated the first instruction and IPI delivery
+#   silently broke. Fixed upstream in unixnu-armcpu 55cc0617 and carried in the
+#   SM8150 source transform (scripts/nabu_armcpu_source.py in UniXNU-nabu).
